@@ -16,12 +16,15 @@ img_dinoduck = [pygame.image.load("DinoDuck1.png"),pygame.image.load("DinoDuck2.
 img_bird = pygame.image.load("Bird1.png")
 img_birdrun = [pygame.image.load("Bird1.png"),pygame.image.load("Bird2.png")]
 img_track = pygame.image.load("track.png")
+img_missile = pygame.image.load("missile.png")
 
 
 
 
 img_cactus = pygame.image.load("cactus.png")
 img_dino = pygame.transform.scale(img_dino,(100,100))
+img_missile = pygame.transform.scale(img_missile,(100,100))
+
 
 # 設定角色
 dino_rect = img_dino.get_rect()
@@ -29,6 +32,7 @@ dino_rect.x = 50
 dino_rect.y = 300
 is_jumping = False
 is_ducking = False
+attack = False
 jump = 15
 nowjump =jump
 g = 1
@@ -43,6 +47,11 @@ bird_rect.x = 2000
 bird_rect.y = 250
 initspeed = 10
 speed = initspeed
+
+missile_rect = img_missile.get_rect()
+missile_rect.x = dino_rect.x+50
+missile_rect.y = dino_rect.y+20
+
 # 設定分數
 score = 0
 highscore =0 # 最高紀錄
@@ -59,6 +68,9 @@ gameover = False
 lastime = 0
 frame = 0
 
+def attack():
+    screen.blit(img_missile,(70,250))
+    pass
 
 while running:
     # poll for events
@@ -78,6 +90,12 @@ while running:
                     bird_rect.x = 2000
                     speed = initspeed
                     gameover = False
+                if event.key == pygame.K_v:
+                    attack = True
+                    missile_rect.y = dino_rect.y+20
+                    missile_rect.x = dino_rect.x+50
+
+
                 if event.key == pygame.K_s:
                     dino_rect.y = 330
                     is_ducking = True
@@ -98,11 +116,11 @@ while running:
 
                     
 
-    if not gameover:
-        
-        
+    if not gameover:        
         if is_jumping:
             dino_rect.y -= nowjump
+            
+
             nowjump -= g
             if dino_rect.y>300:
                 dino_rect.y=300
@@ -111,6 +129,7 @@ while running:
 
         cactus_rect.x -= speed
         bird_rect.x -= speed
+        
         if cactus_rect.x < 0:
             cactus_rect.x = random.randrange(1280, 3000)
            
@@ -133,11 +152,21 @@ while running:
             gameover = True
             speed = initspeed
         
-        
+
+        if score > 1000:
+            speed = speedlist[1]
+            level = 1
+        elif score > 2000:
+            speed = speedlist[2]
+            level = 2
+        elif score >3000:
+            wpeed = wpeedlist[3]
+            speed = 3
 
         # fill the screen with a color to wipe away anything from last frame
         screen.fill((255,255,255))
         screen.blit(img_track,(0,370))
+        
 
         score_show = font.render(f"Score: {score}",True, BLACK)
         screen.blit(score_show,(10,10))
@@ -147,6 +176,15 @@ while running:
 
         level_show = font.render(f"Level: {level} Speed: {speed}",True, BLACK)
         screen.blit(level_show,(10,50))
+        if attack:
+            missile_rect.x +=5
+            screen.blit(img_missile,(missile_rect.x,missile_rect.y))
+            if missile_rect.colliderect(cactus_rect):
+                cactus_rect.x = random.randint(1280, 3000)
+                missile_rect.x=1280
+            if missile_rect.colliderect(bird_rect):
+                bird_rect.x = random.randint(1280, 3000)
+                missile_rect.x=1280
         
         if gameover:
             gameover_show = font.render(f"Game Over",True, BLACK)
