@@ -68,9 +68,7 @@ gameover = False
 lastime = 0
 frame = 0
 
-def attack():
-    screen.blit(img_missile,(70,250))
-    pass
+
 
 while running:
     # poll for events
